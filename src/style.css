@@ -1,0 +1,15 @@
+@font-face {
+  font-family: 'Indie Flower', cursive;
+  src: url('./IndieFlower.ttf') format('ttf');
+  font-weight: 600;
+  font-style: normal;
+}
+
+body {
+  color: red;
+  font-family: 'Indie Flower', cursive;
+}
+
+img {
+  width: 100px;
+}
