@@ -4,6 +4,9 @@ const webpack = require('webpack');
 const { VueLoaderPlugin } = require('vue-loader');
 const WebpackBundleAnalyzer = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const WebpackBuildNotifier = require('webpack-build-notifier');
 module.exports = {
   entry: {
     index: './src/index.js',
@@ -26,35 +29,20 @@ module.exports = {
     rules: [
       {
         test: /\.css$/i,
+        include: path.resolve(__dirname, 'src'),
+        exclude: path.resolve(__dirname, "./node_modules"),
         use: [
-          {
-            loader: path.resolve(__dirname, '../loader/a.js'),
-            options: {
-              a: 'test a',
-            },
-          },
           { loader: 'style-loader' },
-          {
-            loader: path.resolve(__dirname, '../loader/b.js'),
-            options: {
-              b: 'test b',
-            },
-          },
           {
             loader: 'css-loader',
             options: { esModule: false },
-          },
-          {
-            loader: path.resolve(__dirname, '../loader/c.js'),
-            options: {
-              c: 'test c',
-            },
           },
         ],
       },
       {
         test: /\.(png|jpg|jpeg|svg|gif)$/i,
         type: 'asset/resource',
+        exclude: /node_modules/,
         //生成的输出文件配置
         generator: {
           filename: 'static/[hash][ext][query]',
@@ -63,13 +51,15 @@ module.exports = {
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
         type: 'asset/resource',
+        exclude: /node_modules/,
         generator: {
           filename: 'static/[hash][ext][query]',
         },
       },
       {
         test: /\.js$/i,
-        exclude: /node_modules/,
+        include: path.resolve(__dirname, 'src'),
+        exclude: path.resolve(__dirname, "./node_modules"),
         use: {
           loader: 'babel-loader',
           options: {
@@ -81,16 +71,20 @@ module.exports = {
       {
         test: /\.tsx?$/,
         use: 'ts-loader',
-        exclude: /node_modules/,
+        include: path.resolve(__dirname, 'src'),
+        exclude: path.resolve(__dirname, "./node_modules"),
       },
       {
         test: /\.vue$/,
         loader: 'vue-loader',
+        include: path.resolve(__dirname, 'src'),
+        exclude: path.resolve(__dirname, "./node_modules"),
       },
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.js', '.ts', '.json'], // 频率高的出现再最前面，列表尽可能的小，书写导入语句时，尽量写上后缀名
+    modules: [path.resolve(__dirname, 'node_modules')],
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -107,7 +101,14 @@ module.exports = {
     }),
     new VueLoaderPlugin(),
     new WebpackBundleAnalyzer({
-      analyzerPort: 9999
+      analyzerPort: 9999,
+      statsFilename: 'stats.json',
+    }),
+    new SpeedMeasurePlugin(),
+    new ProgressBarPlugin(),
+    new WebpackBuildNotifier({
+      title: 'webpack-demo',
+      supressSuccess: true,
     }),
   ],
 };

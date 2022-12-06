@@ -41,7 +41,7 @@ module.exports = (env) => {
     },
     output: {
       // filename: '[name].[contenthash].js',
-      filename: '[name].bundle.js',
+      filename: 'js/[name].bundle.js',
       path: path.resolve(__dirname, '../dist'),
       clean: true,
     },
@@ -49,6 +49,8 @@ module.exports = (env) => {
       rules: [
         {
           test: /\.css$/i,
+          include: path.resolve(__dirname, 'src'),
+          exclude: path.resolve(__dirname, './node_modules'),
           use: [
             { loader: 'style-loader', options: { esModule: false } },
             { loader: 'css-loader', options: { esModule: false } },
@@ -57,12 +59,14 @@ module.exports = (env) => {
         {
           test: /\.(png|jpg|jpeg|svg|gif)$/i,
           type: 'asset/resource',
+          exclude: /node_modules/,
           generator: {
             filename: 'static/[hash][ext][query]',
           },
         },
         {
           test: /\.(woff|woff2|eot|ttf|otf)$/i,
+          exclude: /node_modules/,
           type: 'asset/resource',
           generator: {
             filename: 'static/[hash][ext][query]',
@@ -70,7 +74,8 @@ module.exports = (env) => {
         },
         {
           test: /\.m?js$/i,
-          exclude: /node_modules/,
+          include: path.resolve(__dirname, 'src'),
+          exclude: path.resolve(__dirname, './node_modules'),
           use: {
             loader: 'babel-loader',
             options: {
@@ -82,11 +87,14 @@ module.exports = (env) => {
         {
           test: /\.tsx?$/,
           use: 'ts-loader',
-          exclude: /node_modules/,
+          include: path.resolve(__dirname, 'src'),
+          exclude: path.resolve(__dirname, './node_modules'),
         },
         {
           test: /\.vue$/,
           loader: 'vue-loader',
+          include: path.resolve(__dirname, 'src'),
+          exclude: path.resolve(__dirname, './node_modules'),
         },
       ],
     },

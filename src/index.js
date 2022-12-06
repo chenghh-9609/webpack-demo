@@ -8,7 +8,7 @@ function component() {
   console.log(cube(5));
   const element = document.createElement('div');
   element.classList.add('hello');
-  // element.innerHTML = join(['hello', 'webpack'], ' ');
+  element.innerHTML = join(['hello', 'webpack'], ' ');
   const image = new Image();
   image.src = MyImage;
   element.appendChild(image);

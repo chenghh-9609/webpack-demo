@@ -832,7 +832,7 @@ bundle-analyzer分析结果：
 2. **使用插件SplitChunksPlugin**
 
    该插件可以将公共的依赖模块提取到已有入口chunk中或提取到一个新的chunk。配置optimization.splitcChunks，如下：
-
+   可参考：https://juejin.cn/post/7101555050194927624
    ```javascript
    module.exports = {
      mode: 'development',
@@ -840,10 +840,19 @@ bundle-analyzer分析结果：
        index: './src/index.js',
        another: './src/another-bundle.js',
      },
+
      optimization: {
        runtimeChunk: 'single',
        splitChunks: {
-         chunks: 'all', //创建一个vendors chunk,包括整个应用程序中的node_modules的所有代码，引用次数>-2次就会被打包到同一个vendor中，否则会分开
+         chunks: 'async', //创建一个vendors chunk,包括整个应用程序中的node_modules的所有代码，引用次数>-2次就会被打包到同一个vendor中，否则会分开
+         cacheGroups: {
+          // 如果你的项目中包含 element-ui 等第三方组件（组件较大），建议单独拆包
+          elementUI: {
+            name: "chunk-elementUI", // 单独将 elementUI 拆包
+            priority: 15, // 权重需大于其它缓存组
+            test: /[\/]node_modules[\/]element-ui[\/]/
+          }
+         }
        }
      },
    }
@@ -1007,7 +1016,6 @@ package.json中修改scripts.build：
 
 ```JavaScript
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = (env) => {
   console.log('goal', env.goal);
   console.log('production', env.production);
@@ -1209,6 +1217,33 @@ module.exports = merge(common, {
 console.log(process.env.NODE_ENV); //"development"
 ```
 
+### 压缩HTML
+配置html-webpack-plugin的minify选项
+```javascript
+module.exports={
+  //...
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname,'./index.html'), 
+      filename: '../index.html',
+      minify: {
+          removeComments: true,
+          collapseWhitespace: true,
+          removeRedundantAttributes: true,
+          useShortDoctype: true,
+          removeEmptyAttributes: true,
+          removeStyleLinkTypeAttributes: true,
+          keepClosingSlash: true,
+          minifyJS: true,
+          minifyCSS: true,
+          minifyURLs: true,
+      },
+      chunksSortMode: 'dependency'
+    })
+  ]
+}
+```
+
 ### 压缩CSS
 
 > 本插件会将 CSS 提取到单独的文件中，为每个包含 CSS 的 JS 文件创建一个 CSS 文件，并且支持 CSS 和 SourceMaps 的按需加载。
@@ -1312,15 +1347,73 @@ module.exports = {
 
 splitChunks
 
+```javascript
+module.exports = {
+  optimization: {
+    moduleIds: 'deterministic',
+    minimize: true,
+    runtimeChunk: 'single',
+    splitChunks: {
+      chunks: 'async', // 共有三个值可选：initial(初始模块)、async(按需加载模块)和all(全部模块)
+      minSize: 30000, // 模块超过30k自动被抽离成公共模块
+      minChunks: 1, // 模块被引用>=1次，便分割
+      maxAsyncRequests: 5, // 异步加载chunk的并发请求数量<=5
+      maxInitialRequests: 3, // 一个入口并发加载的chunk数量<=3
+      name: true, // 默认由模块名+hash命名，名称相同时多个模块将合并为1个，可以设置为function
+      automaticNameDelimiter: '~', // 命名分隔符
+      cacheGroups: {
+        // 缓存组，会继承和覆盖splitChunks的配置
+        default: {
+          // 模块缓存规则，设置为false，默认缓存组将禁用
+          minChunks: 2, // 模块被引用>=2次，拆分至vendors公共模块
+          priority: -20, // 优先级
+          reuseExistingChunk: true, // 默认使用已有的模块
+        },
+        vendors: {
+          test: /[\\/]node_modules[\\/]/, // 表示默认拆分node_modules中的模块
+          priority: -10,
+        },
+      },
+    },
+    usedExports: true,
+    minimizer: [
+      new TerserPlugin({
+        test: /\.js(\?.*)?$/i, //匹配需要压缩的文件类型
+        include: /\/src/, //匹配参与压缩的文件
+        parallel: true, // 多进程并发运行以提高构建速度，强烈建议添加此配置
+        minify: TerserPlugin.uglifyJsMinify, // 类型为function，可自定义压缩函数，此处使用ugligy-js压缩
+        extractComments: false, // 删除注释
+        terserOptions: {
+          compress: true,
+          format: {
+            comments: false,
+          },
+        },
+      }),
+      new CssMinimizerPlugin({
+        test: /\.css$/,
+        include: /\/src/,
+        parallel: true,
+      }),
+    ],
+  },
+}
+```
+
+vue项目中配置后： 原dist.zip包大小7.7M变为5.3M
+
 dllplugin
-
-
+主要用于第三方库的缓存
+无法按需加载
+与splitChunks有冲突？
+貌似没有配置的必要？
+参考：https://juejin.cn/post/6844903996910469133
 
 ## 构建性能
 
 ### 通用环境
 
-1. loader
+1. 优化loader配置
 
    将loader应用于最少数量的必要模块，使用include字段，仅将loader应用在实际需要将其转换的模块：
 
@@ -1332,8 +1425,10 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
+        
         include: path.resolve(__dirname, 'src'),
-        loader: 'babel-loader',
+        exclude: /node_modules/,
+        loader: 'babel-loader?cacheDirectory',//开启转换结果缓存
       },
     ],
   },
@@ -1346,14 +1441,91 @@ module.exports = {
 3. 解析
 
    以下步骤可以提高解析速度：
-
    - 减少 `resolve.modules`, `resolve.extensions`, `resolve.mainFiles`, `resolve.descriptionFiles` 中条目数量，因为他们会增加文件系统调用的次数。
    - 如果你不使用 symlinks（例如 `npm link` 或者 `yarn link`），可以设置 `resolve.symlinks: false`。
    - 如果你使用自定义 resolve plugin 规则，并且没有指定 context 上下文，可以设置 `resolve.cacheWithContext: false`。
+   
+   优化resolve.extensions配置
+    在导入没带文件后缀的路径时，webpack会自动带上后缀去尝试询问文件是否存在，而resolve.extensions用于配置尝试后缀列表；默认为extensions:['js','json'];
+    及当遇到require('./data')时webpack会先尝试寻找data.js，没有再去找data.json；如果列表越长，或者正确的后缀越往后，尝试的次数就会越多；
+    所以在配置时为提升构建优化需遵守：
+    - 频率出现高的文件后缀优先放在前面；
+    - 列表尽可能的小；
+    - 书写导入语句时，尽量写上后缀名
+    因为项目中用的jsx较多，所以配置extensions: [".jsx",".js"],
 
-4. dll
+    优化resolve.modules配置
+    resolve.modules用于配置webpack去哪些目录下寻找第三方模块，默认是['node_modules']，但是，它会先去当前目录的./node_modules查找，没有的话再去../node_modules最后到根目录;
+    所以当安装的第三方模块都放在项目根目录时，就没有必要安默认的一层一层的查找，直接指明存放的绝对位置
+    ```javascript
+    resolve: {
+        modules: [path.resolve(__dirname, 'node_modules')],
+    }
+    ```
 
+4. dll（仅供参考）
+   原文：[性能优化篇---Webpack构建速度优化](https://segmentfault.com/a/1190000018493260)
    使用 `DllPlugin` 为更改不频繁的代码生成单独的编译结果。这可以提高应用程序的编译速度，尽管它增加了构建过程的复杂度。
+   接入需要完成的事：
+   - 将依赖的第三方模块抽离，打包到一个个单独的动态链接库中
+   - 当需要导入的模块存在动态链接库中时，让其直接从链接库中获取
+   - 项目依赖的所有动态链接库都需要被加载
+   接入工具(webpack已内置)
+   - DllPlugin插件：用于打包出一个个单独的动态链接库文件；
+   - DllReferencePlugin:用于在主要的配置文件中引入DllPlugin插件打包好的动态链接库文件
+   配置`webpack.dev.js`：
+   ```javascript
+    const path = require('path');
+    const DllPlugin = require('webpack/lib/DllPlugin');
+
+    module.exports = {
+      mode: 'production',
+      entry: {
+          // 将React相关模块放入一个动态链接库
+          react: ['react','react-dom','react-router-dom','react-loadable'],
+          librarys: ['wangeditor'],
+          utils: ['axios','js-cookie']
+      },
+      output: {
+          filename: '[name]-dll.js',
+          path: path.resolve(__dirname, 'dll'),
+          // 存放动态链接库的全局变量名，加上_dll_防止全局变量冲突
+          library: '_dll_[name]'
+      },
+      // 动态链接库的全局变量名称，需要可output.library中保持一致，也是输出的manifest.json文件中name的字段值
+      // 如react.manifest.json字段中存在"name":"_dll_react"
+      plugins: [
+          new DllPlugin({
+              name: '_dll_[name]',
+              path: path.join(__dirname, 'dll', '[name].manifest.json')
+          })
+      ]
+    }
+   ```
+   配置`webpack.prod.js`:
+  ```javascript
+  const DllReferencePlugin = require('webpack/lib/DllReferencePlugin');
+  module.exports = {
+    plugins: [
+      // 告诉webpack使用了哪些动态链接库
+      new DllReferencePlugin({
+          manifest: require('./dll/react.manifest.json')
+      }),
+      new DllReferencePlugin({
+          manifest: require('./dll/librarys.manifest.json')
+      }),
+      new DllReferencePlugin({
+          manifest: require('./dll/utils.manifest.json')
+      }),
+    ]
+  }
+  ```
+  注意：在webpack_dll.config.js文件中，DllPlugin中的name参数必须和output.library中的一致；因为DllPlugin的name参数影响输出的manifest.json的name；而webpack.pro.config.js中的DllReferencePlugin会读取manifest.json的name，将值作为从全局变量中获取动态链接库内容时的全局变量名
+  执行构建
+  1. webpack --progress --colors --config ./webpack.dll.config.js
+  2. webpack --progress --colors --config ./webpack.prod.js
+  3. html中引入dll.js文件
+
 
 5. 小即是快(smaller = faster)
 
@@ -1372,7 +1544,7 @@ module.exports = {
 7. 持久化缓存
 
    在 webpack 配置中使用 [`cache`](https://webpack.docschina.org/configuration/cache) 选项。使用 `package.json` 中的 `"postinstall"` 清除缓存目录。
-
+   
 ### 开发环境
 
 1. 增量编译
@@ -1463,7 +1635,15 @@ module.exports = {
 3. Sass
    - `node-sass` 中有个来自 Node.js 线程池的阻塞线程的 bug。 当使用 `thread-loader` 时，需要设置 `workerParallelJobs: 2`。
 
+4. 测量构建速度插件：`speed-measure-webpack-plugin`
 
+5. 终端底部展示构建进度条：`progress-bar-webpack-plugin`
+
+6. 弹窗提示构建完成：`webpack-build-notifier`
+
+7. 优化webpack构建输出：`webpack-dashboard`
+
+8. webpack构建信息json文件：webpack --profile --json > stats.json
 
 ## Tree Shaking
 
@@ -1560,6 +1740,15 @@ module.exports={
 待学习。。。
 
 ## 
+vu查看webpack版本：cat node_modules/webpack/package.json
 
 参考：
 https://webpack.docschina.org/guides/getting-started/
+
+https://juejin.cn/post/6844903588607557639
+
+https://llh911001.gitbooks.io/mostly-adequate-guide-chinese/content/ch3.html
+
+https://zhuanlan.zhihu.com/p/26710831
+
+https://segmentfault.com/a/1190000018493260
