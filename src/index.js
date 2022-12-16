@@ -1,7 +1,7 @@
 import './style.css';
 import './style2.css';
 import printMe from './print.js';
-// import _ from 'lodash';
+import _ from 'lodash';
 import MyImage from './background.jpg';
 import { cube } from './math.js';
 function component() {
@@ -15,7 +15,7 @@ function component() {
   const btn = document.createElement('button');
   btn.innerHTML = 'Click me and check the console!';
   btn.onclick = printMe;
-  printMe();
+  // printMe();
   // 懒加载
   // btn.onclick = () =>
   //   import(/* webpackChunkName: "print" */ './print.js').then((module) => {

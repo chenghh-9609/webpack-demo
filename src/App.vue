@@ -15,7 +15,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
 #app {
   text-align: center;
   color: #2c3e50;

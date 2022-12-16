@@ -1227,16 +1227,12 @@ module.exports={
       template: path.resolve(__dirname,'./index.html'), 
       filename: '../index.html',
       minify: {
-          removeComments: true,
-          collapseWhitespace: true,
-          removeRedundantAttributes: true,
-          useShortDoctype: true,
-          removeEmptyAttributes: true,
-          removeStyleLinkTypeAttributes: true,
-          keepClosingSlash: true,
-          minifyJS: true,
-          minifyCSS: true,
-          minifyURLs: true,
+        removeComments: true,
+        removeRedundantAttributes: true,
+        removeScriptTypeAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        collapseWhitespace: true,
+        useShortDoctype: true,
       },
       chunksSortMode: 'dependency'
     })
@@ -1326,8 +1322,8 @@ document.body.appendChild(component());
 const TerserPlugin = require("terser-webpack-plugin");
 module.exports = {
   optimization: {
-     minimizer: [new TerserPlugin
-       {
+     minimizer: [
+      new TerserPlugin({
           test: /\.js(\?.*)?$/i, //匹配需要压缩的文件类型
           include: /\/src/,   //匹配参与压缩的文件
           parallel: true, // 多进程并发运行以提高构建速度，强烈建议添加此配置
@@ -1338,8 +1334,8 @@ module.exports = {
               comments: false,
             },
           }
-        },
-      )],
+        })
+      ],
    },
    //...
 }
@@ -1399,9 +1395,6 @@ module.exports = {
   },
 }
 ```
-
-vue项目中配置后： 原dist.zip包大小7.7M变为5.3M
-
 dllplugin
 主要用于第三方库的缓存
 无法按需加载
@@ -1427,7 +1420,7 @@ module.exports = {
         test: /\.js$/,
         
         include: path.resolve(__dirname, 'src'),
-        exclude: /node_modules/,
+        // exclude: /node_modules/,   //js库可能包含在内
         loader: 'babel-loader?cacheDirectory',//开启转换结果缓存
       },
     ],

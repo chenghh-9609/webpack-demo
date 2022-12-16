@@ -2,16 +2,16 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const { VueLoaderPlugin } = require('vue-loader');
-const WebpackBundleAnalyzer = require('webpack-bundle-analyzer')
-  .BundleAnalyzerPlugin;
-const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
-const ProgressBarPlugin = require('progress-bar-webpack-plugin');
-const WebpackBuildNotifier = require('webpack-build-notifier');
+// const WebpackBundleAnalyzer = require('webpack-bundle-analyzer')
+//   .BundleAnalyzerPlugin;
+// const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
+// const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+// const WebpackBuildNotifier = require('webpack-build-notifier');
 module.exports = {
   entry: {
-    index: './src/index.js',
+    // index: './src/index.js',
     // Vue 入口
-    // main: './src/main.js',
+    main: './src/main.js',
   },
   optimization: {
     runtimeChunk: 'single',
@@ -28,14 +28,15 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.css$/i,
-        include: path.resolve(__dirname, 'src'),
-        exclude: path.resolve(__dirname, "./node_modules"),
+        test: /\.(sa|sc|c)ss$/i,
         use: [
-          { loader: 'style-loader' },
+          { loader: 'vue-style-loader' },
           {
             loader: 'css-loader',
             options: { esModule: false },
+          },
+          {
+            loader: 'sass-loader',
           },
         ],
       },
@@ -58,8 +59,6 @@ module.exports = {
       },
       {
         test: /\.js$/i,
-        include: path.resolve(__dirname, 'src'),
-        exclude: path.resolve(__dirname, "./node_modules"),
         use: {
           loader: 'babel-loader',
           options: {
@@ -71,20 +70,18 @@ module.exports = {
       {
         test: /\.tsx?$/,
         use: 'ts-loader',
-        include: path.resolve(__dirname, 'src'),
-        exclude: path.resolve(__dirname, "./node_modules"),
       },
       {
         test: /\.vue$/,
         loader: 'vue-loader',
-        include: path.resolve(__dirname, 'src'),
-        exclude: path.resolve(__dirname, "./node_modules"),
+        include: path.resolve(__dirname, '../src'),
+        exclude: path.resolve(__dirname, '../node_modules'),
       },
     ],
   },
   resolve: {
     extensions: ['.js', '.ts', '.json'], // 频率高的出现再最前面，列表尽可能的小，书写导入语句时，尽量写上后缀名
-    modules: [path.resolve(__dirname, 'node_modules')],
+    modules: [path.resolve(__dirname, '../node_modules')],
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -96,19 +93,19 @@ module.exports = {
     // 比如a库和b库都用了jQuery中的$，
     // 这时可以将$变量提取出来声明为全局变量
     new webpack.ProvidePlugin({
-      // _ : 'lodash',
+      _: 'lodash',
       join: ['lodash', 'join'], // 将join作为全局函数，所有模块都能不引用就可使用
     }),
     new VueLoaderPlugin(),
-    new WebpackBundleAnalyzer({
-      analyzerPort: 9999,
-      statsFilename: 'stats.json',
-    }),
-    new SpeedMeasurePlugin(),
-    new ProgressBarPlugin(),
-    new WebpackBuildNotifier({
-      title: 'webpack-demo',
-      supressSuccess: true,
-    }),
+    // new WebpackBundleAnalyzer({
+    //   analyzerPort: 9999,
+    //   statsFilename: 'stats.json',
+    // }),
+    // new SpeedMeasurePlugin(),
+    // new ProgressBarPlugin(),
+    // new WebpackBuildNotifier({
+    //   title: 'webpack-demo',
+    //   supressSuccess: true,
+    // }),
   ],
 };

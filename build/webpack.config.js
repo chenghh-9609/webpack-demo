@@ -1,8 +1,9 @@
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
-const WebpackBundleAnalyzer = require('webpack-bundle-analyzer')
-  .BundleAnalyzerPlugin;
+const WebpackBundleAnalyzer =
+  require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 module.exports = (env) => {
   console.log('goal', env.goal);
   console.log('production', env.production);
@@ -49,8 +50,8 @@ module.exports = (env) => {
       rules: [
         {
           test: /\.css$/i,
-          include: path.resolve(__dirname, 'src'),
-          exclude: path.resolve(__dirname, './node_modules'),
+          include: path.resolve(__dirname, '../src'),
+          exclude: path.resolve(__dirname, '../node_modules'),
           use: [
             { loader: 'style-loader', options: { esModule: false } },
             { loader: 'css-loader', options: { esModule: false } },
@@ -74,8 +75,6 @@ module.exports = (env) => {
         },
         {
           test: /\.m?js$/i,
-          include: path.resolve(__dirname, 'src'),
-          exclude: path.resolve(__dirname, './node_modules'),
           use: {
             loader: 'babel-loader',
             options: {
@@ -87,14 +86,12 @@ module.exports = (env) => {
         {
           test: /\.tsx?$/,
           use: 'ts-loader',
-          include: path.resolve(__dirname, 'src'),
-          exclude: path.resolve(__dirname, './node_modules'),
         },
         {
           test: /\.vue$/,
           loader: 'vue-loader',
-          include: path.resolve(__dirname, 'src'),
-          exclude: path.resolve(__dirname, './node_modules'),
+          include: path.resolve(__dirname, '../src'),
+          exclude: path.resolve(__dirname, '../node_modules'),
         },
       ],
     },
@@ -107,6 +104,9 @@ module.exports = (env) => {
       new VueLoaderPlugin(),
       new WebpackBundleAnalyzer({
         analyzerPort: 9999,
+      }),
+      new webpack.ProvidePlugin({
+        join: ['lodash', 'join'],
       }),
     ],
   };

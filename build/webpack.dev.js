@@ -9,11 +9,9 @@ module.exports = merge(common, {
     static: '../dist',
     port: 5000,
     hot: true,
-    open: true,
     proxy: {
       // 跨域代理转发
       '/apis': {
-        target: 'https://localhost:80',
         changeOrigin: true,
         headers: {
           Cookie: '',
