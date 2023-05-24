@@ -804,7 +804,7 @@ bundle-analyzer分析结果：
    }
    ```
 
-   如图，index.bundle.js和another.bundle.js的公共资源被打包到shared.bundle.js中。![](/E:/learn/webpack-demo/assets/image/terminal2.jpeg)
+   如图，index.bundle.js和another.bundle.js的公共资源被打包到shared.bundle.js中。![](/assets/image/terminal2.jpeg)
 
    这种方法配置虽然可行，但是每次有新的重复引入的模块都需要修改配置，确定每个入口文件是否有公共模块并提取出来，比较麻烦。
 
@@ -965,7 +965,7 @@ module.exports = {
 }
 ```
 
-如下图可看到输出文件的名称都是文件内容的hash映射。如果文件未修改，再次构建文件名会保持不变（实际情况不一定...）![](/E:/learn/webpack-demo/assets/image/terminal5.jpeg)
+如下图可看到输出文件的名称都是文件内容的hash映射。如果文件未修改，再次构建文件名会保持不变（实际情况不一定...）![](/assets/image/terminal5.jpeg)
 
 ### 模块标识符
 
