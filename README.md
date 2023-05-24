@@ -1,7 +1,3 @@
----
-typora-root-url: E:\learn\webpack-demo\assets\image
----
-
 # webpack5学习
 
 ## 起步
@@ -48,8 +44,7 @@ index.html
 ```
 
 目录结构：
-
-![](/E:/learn/webpack-demo/assets/image/project-dir1.jpeg)
+![在这里插入图片描述](/assets/image/project-dir1.jpeg)
 
 上面的index.html在网页直接打开可以查看，但是lodash库是在html中引入的，这种管理方式有一些问题：
 
@@ -124,7 +119,7 @@ package.json添加scripts：`"build": "webpack"`
 
 终端运行`npm run build`打包，在dist中会生成main.js
 
-![](/E:/learn/webpack-demo/assets/image/project-dir2.jpeg)
+![](/assets/image/project-dir2.jpeg)
 
 index.html打开可显示正常
 
@@ -168,7 +163,7 @@ module.exports = {
 
 项目目录：
 
-![](/E:/learn/webpack-demo/assets/image/project-dir3.jpeg)
+![](assets/image/project-dir3.jpeg)
 
 打包命令：`npm run build`
 
@@ -229,7 +224,7 @@ document.body.appendChild(component());
 
 运行build命令：`npm run build`，在浏览器中打开dist/index.html，可以看到style.css的内容以<style>标签添加至html的<head>中。
 
-![](/E:/learn/webpack-demo/assets/image/browser1.jpeg)
+![](/assets/image/browser1.jpeg)
 
 ### 加载图像
 
@@ -488,17 +483,7 @@ module.exports ={
 
    4. vue文件中定义的样式未生效
 
-      
-
-      
-
 2. **Vue3**
-
-   
-
-
-
-
 
 ### 加载TypeScript
 
@@ -506,7 +491,7 @@ module.exports ={
 
 修改目录结构，添加src/index.ts和tsconfog.json：
 
-![](/E:/learn/webpack-demo/assets/image/project-dir5.jpeg)
+![](/assets/image/project-dir5.jpeg)
 
 src/index.ts
 
@@ -592,10 +577,6 @@ declare module '*.jpg' {
   export default content;
 }
 ```
-
-
-
-
 
 ## 管理输出
 
@@ -731,8 +712,6 @@ module.exports = {
   }
   ```
 
-  
-
 - [webpack bundle optimize helper](https://webpack.jakoblind.no/optimize)：这个工具会分析你的 bundle，并提供可操作的改进措施，以减少 bundle 的大小。
 
 - [bundle-stats](https://github.com/bundle-stats/bundle-stats)：生成一个 bundle 报告（bundle 大小、资源、模块），并比较不同构建之间的结果。
@@ -787,11 +766,11 @@ module.exports = {
 
 构建结果：
 
-![](/E:/learn/webpack-demo/assets/image/terminal1.jpeg)
+![](/assets/image/terminal1.jpeg)
 
 bundle-analyzer分析结果：
 
-![](/E:/learn/webpack-demo/assets/image/bundle1.jpeg)
+![](/assets/image/bundle1.jpeg)
 
 可以看到another-bundle.js和index.js都引入了lodash，按之前的配置构建后的两个bundle重复引入了lodash。
 
@@ -860,11 +839,11 @@ bundle-analyzer分析结果：
 
    构建结果如下，可以看到和上一个方法效果差不多：
 
-   ![](/E:/learn/webpack-demo/assets/image/terminal3.jpeg)
+   ![](/assets/image/terminal3.jpeg)
 
    bundle-analyzer分析结果：
 
-   ![](/E:/learn/webpack-demo/assets/image/bundle2.jpeg)
+   ![](/assets/image/bundle2.jpeg)
 
    splitChunks默认配置：
 
@@ -918,7 +897,7 @@ component().then((comp)=>document.body.appendChild(comp));
 
 此时lodash引入的库会在自动分离到单独的bundle中：
 
-![](/E:/learn/webpack-demo/assets/image/terminal4.jpeg)
+![](/assets/image/terminal4.jpeg)
 
 ### 懒加载
 
@@ -940,11 +919,11 @@ document.body.appendChild(component());
 
 `npm run build `后浏览器打开dist/index.html，可以看到页面加载时并没有请求print.js
 
-![](/E:/learn/webpack-demo/assets/image/browser2.jpeg)
+![](/assets/image/browser2.jpeg)
 
 点击button后才会请求：
 
-![](/E:/learn/webpack-demo/assets/image/browser3.jpeg)
+![](/assets/image/browser3.jpeg)
 
 **框架懒加载**
 
@@ -1030,7 +1009,8 @@ module.exports = (env) => {
 
 ```
 
-`npm run build`输出结果：![](/E:/learn/webpack-demo/assets/image/terminal7.jpeg)
+`npm run build`输出结果：
+![](/assets/image/terminal7.jpeg)
 
 
 
@@ -1052,13 +1032,13 @@ export default function printMe() {
 
 如图错误位置不明确
 
-![](/E:/learn/webpack-demo/assets/image/log2.jpeg)
+![](/assets/image/log2.jpeg)
 
 为了更容易追踪error和warning，JavaScript提供了source maps功能，可将编译后的代码映射回源码。
 
 使用source-map`devtool: 'inline-source-map'`，如图可对应到源码print.js文件的第2行
 
-![](/E:/learn/webpack-demo/assets/image/log1.jpeg)
+![](/assets/image/log1.jpeg)
 
 source map相当耗资源，不建议在生产环境使用。
 
@@ -1110,8 +1090,6 @@ module.exports = {
 
 ```
 
-
-
 ## 生产环境
 
 生产环境关注压缩bundle、更轻量的source map、资源优化等，以改善加载时间。通常不同环境编写独立的webpack配置。
@@ -1126,7 +1104,7 @@ module.exports = {
 
 在build文件夹中新建webpack.commom.js、webpack.dev.js、webpack.prod.js
 
-![](/E:/learn/webpack-demo/assets/image/project-dir4.jpeg)
+![](/assets/image/project-dir4.jpeg)
 
 build/webpack.common.js
 
@@ -1293,7 +1271,7 @@ module.exports = {
 
 // src/index.js
 import './style.css';
-import './style2.css';![project-dir6](/E:/learn/webpack-demo/assets/image/project-dir6.jpeg)
+import './style2.css';
 function component() {
   const element = document.createElement('div');
   element.classList.add('hello');
@@ -1309,9 +1287,9 @@ document.body.appendChild(component());
 
 `npm run build`构建后，可以看到打包后src/index.js里引入的两个css文件被合并在css/index.[hash].css里，且代码被压缩：
 
-![](/E:/learn/webpack-demo/assets/image/project-dir6.jpeg)
+![](/assets/image/project-dir6.jpeg)
 
-![](/E:/learn/webpack-demo/assets/image/code3.jpeg)
+![](/assets/image/code3.jpeg)
 
 ### 压缩JS
 
@@ -1698,7 +1676,7 @@ module.exports={
 
 `npm run build`查看dist/index.bundle.js：
 
-![](/E:/learn/webpack-demo/assets/image/code2.jpeg)
+![](/assets/image/code2.jpeg)
 
 修改package.json，math.js未被包含在内，即表示它是“pure”模块：
 
@@ -1710,7 +1688,7 @@ module.exports={
 
 如果src/index.js中使用了math模块中某个函数，则仍会导入了所有函数。。。貌似并没有完全解决问题？
 
-![](/E:/learn/webpack-demo/assets/image/code1.jpeg)
+![](/assets/image/code1.jpeg)
 
 [shimming预置依赖](https://cloud.tencent.com/developer/article/1602726)
 
